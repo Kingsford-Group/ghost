@@ -3,8 +3,9 @@ package edu.umd.cbcb.ghost.matchers.actors
 import scala.collection.mutable.{ HashSet => MHashSet, HashMap => MHashMap, MultiMap }
 import scala.collection.immutable.{ TreeMap }
 import scala.collection.JavaConversions._
-import scala.actors.Actor
-import scala.actors._
+//import scala.actors.Actor
+import akka.actor._
+//import scala.actors._
 import scala.math._
 
 import org.jgrapht.graph._
@@ -42,26 +43,25 @@ class JointSpectrumReceiver( val reqNumSpec : Int ) extends Actor {
   val pb = new ProgressBar( reqNumSpec, "*" )
   val specMap = new MHashMap[(String, String), SimpleMatrix]
 
-  def act() = {
-
-    loopWhile( !done ) {
-      react {
-	case JointSpectrumMsg( u: String, v: String, s: Array[Double] ) => {
-	  val sv = new SimpleMatrix(Array(s))
-	  if (u < v) {
-	    specMap( (u,v) ) = sv; //new SimpleMatrix( Array(s) )
-	  } else {
-	    specMap( (v,u) ) = sv; //new SimpleMatrix( Array(s) )
-	  }
-	  pb.update(specMap.size)
-	}
-	case Stop() => {
-	  pb.done()
-	  exit()
-	}
-      } // end react
-    } // end loopWhile
-
+  def receive = {
+      case JointSpectrumMsg( u: String, v: String, s: Array[Double] ) => {
+          val sv = new SimpleMatrix(Array(s))
+          if (u < v) {
+              specMap( (u,v) ) = sv; //new SimpleMatrix( Array(s) )
+          } else {
+              specMap( (v,u) ) = sv; //new SimpleMatrix( Array(s) )
+          }
+          pb.update(specMap.size)
+      }
+      case Stop() => {
+          pb.done()
+          context.stop(self)
+      }
+      case _ => {
+          if(done) {
+              context.stop(self)
+          }
+     }
   }
 
   def done() = { specMap.size == reqNumSpec }
@@ -75,9 +75,7 @@ class JointSpectrumComputer( val S: SignatureMap,  val level: Int, val rec : PHM
    * this actor will work
    **/
 
-  def act() = {
-    loop {
-      react {
+  def receive =  {
 	case ComputeJointSpectrum( u, v ) => {
 	  val spec = new SimpleMatrix(Array(generateJointSpectrum(u,v)))
 	  if (u < v) {
@@ -87,9 +85,7 @@ class JointSpectrumComputer( val S: SignatureMap,  val level: Int, val rec : PHM
 	  }
 	  //rec ! JointSpectrumMsg( u, v, generateJointSpectrum( u, v ) )
 	}
-	case Stop => exit()
-      }
-    }
+	case Stop => context.stop(self)
   }
 
 

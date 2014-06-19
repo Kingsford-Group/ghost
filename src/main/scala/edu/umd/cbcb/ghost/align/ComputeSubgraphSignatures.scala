@@ -52,21 +52,14 @@ object ComputeSubgraphSignatures {
 
   def main(args: Array[String]) {
     var config = new Config
-    val parser = new OptionParser("ComputeSubgraphSignatures") {
-      intOpt("p", "numProcessors", "number of actors to use in parallel",
-	   { v: Int => config.numActors = v })
-      opt("i", "input", "input network file",
-	{ v: String => config.infile = v})
-      opt("g", "ghtree", "Gomory-Hu cut tree",
-	{ v: String => config.ghtree= v})
-      opt("o", "output", "output signature file",
-	{ v: String => config.outdir = v})
-      intOpt("k", "numHops", "maximum hop neighborhood to consider",
-	     { v: Int => config.numHops = v})
-      booleanOpt("s", "simpleSig", "output (simple) signature format",
-		 {  v: Boolean => config.simpleSig = v} )
-      booleanOpt("w", "useWeight", "use edge confidence",
-	       { v: Boolean => config.useWeight = v})
+    val parser = new scopt.OptionParser[Unit]("ComputeSubgraphSignatures") {
+      opt[Int]('p', "numProcessors") foreach { v => config.numActors = v} text("number of actors to use in parallel")
+      opt[String]('i', "input") foreach { v => config.infile = v} text ("input network file")
+      opt[String]('g', "ghtree") foreach { v => config.ghtree= v} text( "Gomory-Hu cut tree")
+      opt[String]('o', "output") foreach { v => config.outdir = v} text("output signature file")
+      opt[Int]('k', "numHops") foreach { v => config.numHops = v} text("maximum hop neighborhood to consider")
+      opt[Boolean]('s', "simpleSig") foreach {  v => config.simpleSig = v} text("output (simple) signature format")
+      opt[Boolean]('w', "useWeight") foreach { v => config.useWeight = v} text("use edge confidence")
     }
 
     if (parser.parse(args)) {

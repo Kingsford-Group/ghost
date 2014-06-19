@@ -4,7 +4,8 @@ import akka.actor.ActorSystem
 import scala.collection.parallel.mutable.ParArray
 import scala.collection.parallel.immutable.ParMap
 import scala.collection.parallel.ParIterable
-import collection.mutable.{ ConcurrentMap => CMMap, HashMap => MHashMap, HashSet => MHashSet, PriorityQueue }
+import collection.mutable.{ HashMap => MHashMap, HashSet => MHashSet, PriorityQueue }
+import collection.concurrent.{ Map => CMMap }
 import edu.umd.cbcb.ghost.align.SignatureMap
 
 /** Classes to create different kinds of matchers */

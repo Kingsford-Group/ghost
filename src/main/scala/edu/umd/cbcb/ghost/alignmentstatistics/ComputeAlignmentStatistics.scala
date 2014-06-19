@@ -56,15 +56,19 @@ object ComputeAlignmentStatistics {
 
   def main( args: Array[String] ) = { 
     var config = new Config
-    val parser = new OptionParser("ComputeAlignmentStatistics") { 
-      opt("u", "g1", "first input graph",
-	{ v: String => config.g1FileName = v})
-      opt("v", "g2", "second input graph",
-	{ v: String => config.g2FileName = v})
-      opt("a", "alignment", "alignment file or directory",
-	{ v: String => config.alignment = v})
-      opt("n", "name", "aligner name",
-        { v: String => config.alignerName = v})
+    val parser = new OptionParser[Unit]("ComputeAlignmentStatistics") { 
+      opt[String]('u', "g1") text("first input graph") foreach {
+         v: String => config.g1FileName = v
+      }
+      opt[String]('v', "g2") text("second input graph") foreach {
+	     v: String => config.g2FileName = v
+      }
+      opt[String]('a', "alignment") text("alignment file or directory") foreach {
+	    v: String => config.alignment = v
+      }
+      opt[String]('n', "name") text("aligner name") foreach {
+        v: String => config.alignerName = v
+      }
     }
 
     if (parser.parse(args)) {

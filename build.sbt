@@ -21,18 +21,16 @@ name := "GHOST"
 
 version := "1.0"
 
-scalaVersion := "2.10.2"
+scalaVersion := "2.11.1"
 
-crossScalaVersions := Seq("2.10")
+crossScalaVersions := Seq("2.11")
 
 unmanagedSources in Compile ~= { srcFiles => srcFiles.filterNot{ x => x.name.contains("GenerateBioPlotFile") } }
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", 
                       "-language:implicitConversions", "-language:higherKinds", "-language:postfixOps")
 
-resolvers += ScalaToolsSnapshots
-
-resolvers += ScalaToolsReleases
+resolvers += "ScalaTools snapshots at Sonatype" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 resolvers += "Scala Tools Nexus Snapshots" at "http://nexus.scala-tools.org/content/repositories/snapshots/"
 
@@ -48,27 +46,29 @@ resolvers += "JGraphT Repository" at "http://maven.irisa.fr/artifactory/list/rep
 
 resolvers += "NativeLibs4Java Repository" at "http://nativelibs4java.sourceforge.net/maven/"
 
-resolvers += "sonatype-public" at "https://oss.sonatype.org/content/groups/public"
+resolvers += Resolver.sonatypeRepo("public")
 
 autoCompilerPlugins := true
 
 // addCompilerPlugin("com.nativelibs4java" % "scalacl-compiler-plugin" % "0.2")
 
 libraryDependencies ++= Seq(
-  "org.scala-lang" % "scala-actors" % "2.10.0",
+  "com.typesafe.akka" %% "akka-actor" % "2.3.3",
+  "org.scala-lang" % "scala-actors" % "2.11.1",
+  "org.scala-lang" % "scala-actors-migration_2.11" % "1.1.0",
+  "org.scala-lang" % "scala-compiler" % scalaVersion.value,
   "javax.transaction" % "jta" % "1.1",
-  "com.jsuereth" %% "scala-arm" % "1.3",
   "jgrapht" % "jgrapht" % "0.8.2" ,
+  "org.scala-lang.modules" %% "scala-xml" % "1.0.2",
   "com.googlecode.netlib-java" % "netlib-java" % "0.9.3" ,
   "netlib" % "arpack-combo" % "0.1" ,
   "net.java.dev.jna" % "jna" % "3.3.0" ,
   "com.googlecode.efficient-java-matrix-library" % "ejml" % "0.17" ,
-  "org.clapper" %% "grizzled-scala" % "1.1.3" ,
-  "com.github.scopt" %% "scopt" % "2.1.0" ,
-  "com.nativelibs4java" % "scalacl" % "0.2" ,
-  "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.2" ,
-  "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.2", 
-  "org.rogach" %% "scallop" % "0.8.0"
+  "org.clapper" %% "grizzled-scala" % "1.2" ,
+  "com.github.scopt" %% "scopt" % "3.2.0" ,
+  "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.3",
+  "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.3",
+  "org.rogach" %% "scallop" % "0.9.5"
 )
 
 

@@ -1,11 +1,11 @@
 package edu.umd.cbcb.ghost.align.matchers
 
+//import scala.actors.Actor
 import scala.concurrent.duration._
 import scala.concurrent.{ Await, Future, ExecutionContext, Promise }
+import akka.actor.{Actor, ActorSystem, DeadLetter, Props }
 
-import akka.actor.{ Actor, ActorSystem, DeadLetter, Props }
 import akka.pattern.ask
-
 import com.typesafe.config.ConfigFactory
 
 import scala.math._
@@ -75,11 +75,12 @@ class SpectralMatcher(matches: Map[String, ParArray[(String, String, Double)]], 
 
     // Create the actors that will be responsible for computing the joint spectra
     def createJointSpectrumActors(n: Int, k: Int) = {
-      val extractorArray = new Array[JointSpectrumComputer](n)
+      val extractorArray = new Array[akka.actor.ActorRef](n)
       (0 until n).foreach {
         i =>
-          extractorArray(i) = new JointSpectrumComputer(S, k, cmap)
-          extractorArray(i).start
+          //extractorArray(i) = new JointSpectrumComputer(S, k, cmap)
+          //extractorArray(i).start
+          extractorArray(i) = akka.actor.ActorDSL.actor(sys, "JSCActor")(new JointSpectrumComputer(S, k, cmap))
       }
       extractorArray
     }
@@ -104,7 +105,7 @@ class SpectralMatcher(matches: Map[String, ParArray[(String, String, Double)]], 
     pb.update(cmap.size)
     pb.done
 
-    print("\033[1A\033[1A\033[2K\r")
+    print("\u001b[1A\u001b[1A\u001b[2K\r")
 
     (0 until numExtractors).foreach { i => extractors(i) ! Stop() }
     val specMap = cmap
@@ -293,10 +294,10 @@ class SpectralMatcher(matches: Map[String, ParArray[(String, String, Double)]], 
       val rib: ArrayBuffer[Int],
       val cib: ArrayBuffer[Int],
       val eb: ArrayBuffer[Double],
-      val N: Int) extends Actor {
+      val N: Integer) extends Actor {
 
       private var numRowsAdded = 0
-      import context._
+      //import akka.context._
 
       def receive = {
         case MatrixEntries(ri, ci, e) => {
@@ -325,7 +326,7 @@ class SpectralMatcher(matches: Map[String, ParArray[(String, String, Double)]], 
     println()
     ctr = 0
 
-    val props = Props().withCreator(new MatrixAggregatorActor(rib, cib, eb, matches.size)).withDispatcher("akka.actor.qr-dispatcher")
+    val props = Props.create(classOf[MatrixAggregatorActor], rib, cib, eb, new Integer(matches.size)).withDispatcher("akka.actor.qr-dispatcher")
     val actor = system.actorOf(props, name = "MatrixAggregatorActor")
     val matRows = matches.keysIterator.foreach { k =>
 
@@ -355,7 +356,7 @@ class SpectralMatcher(matches: Map[String, ParArray[(String, String, Double)]], 
     pb.done
 
     // Go back two lines
-    print("\033[1A\033[1A")
+    print("\u001b[1A\u001b[1A")
 
     scale = 1.0 / ma
 

@@ -7,7 +7,8 @@ import collection.{ Map => CMap, LinearSeq }
 import scala.collection.JavaConversions._
 import scala.collection.parallel.mutable.ParArray
 import scala.collection.parallel.ParIterable
-import collection.mutable.{ Map => MMap, Set => MSet, ConcurrentMap => CMMap, HashMap => MHashMap, HashSet => MHashSet }
+import collection.mutable.{ Map => MMap, Set => MSet, HashMap => MHashMap, HashSet => MHashSet }
+import collection.concurrent.{ Map => CMMap }
 import scala.math._
 import scala.util.Random
 

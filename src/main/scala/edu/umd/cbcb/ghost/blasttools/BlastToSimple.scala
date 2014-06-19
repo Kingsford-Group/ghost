@@ -53,7 +53,7 @@ object BlastToSimple {
       val ofile = opt[String]("ofile", descr="output file", required = true )
 
       codependent( lMap, rMap )
-      verify
+      //verify
     }
 
     var omap = Map.empty[ (String, String), Double ]

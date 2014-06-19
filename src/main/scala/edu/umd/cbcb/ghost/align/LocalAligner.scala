@@ -373,37 +373,49 @@ object LocalAligner{
 
   def main(args: Array[String]) {
     var config = new Config
-    val parser = new OptionParser("ComputeSubgraphSignatures") {
-      intOpt("p", "numProcessors", "number of actors to use in parallel",
-	     { v: Int => config.numActors = v})
+    val parser = new OptionParser[Unit]("ComputeSubgraphSignatures") {
+      opt[Int]('p', "numProcessors") text ("number of actors to use in parallel") foreach
+	     { v: Int => config.numActors = v}
       //intOpt("n", "numBins", "number of histogram bins to use",
       //       { v: Int => config.numBins = v })
-      intOpt("l", "localSearch", "number of local search iterations to perform",
-             { v: Int => config.localSearchIter = Some(v) })
-      doubleOpt("a", "alpha", "alpha parameter (trade-off between sequence & topology)",
-             { v: Double => config.alpha = Some(v) })
-      doubleOpt("b", "beta", "beta parameter (Blast e-value cutoff)",
-             { v: Double => config.beta = Some(v) })
-      doubleOpt("r", "unconstrained", "percentage of local swaps which should be allowed to be unconstrained",
-             { v: Double => config.constrainedRatio = Some(v) } )
-      opt("d", "dumpDistances", "dump spectral distances to this file",
-          {v: String => config.distanceDumpFile = Some(v.trim)})
+      opt[Int]('l', "localSearch") text ("number of local search iterations to perform") foreach { 
+        v: Int => config.localSearchIter = Some(v) 
+      }
+      opt[Double]('a', "alpha") text("alpha parameter (trade-off between sequence & topology)") foreach {
+        v: Double => config.alpha = Some(v) 
+      }
+      opt[Double]('b', "beta") text("beta parameter (Blast e-value cutoff)") foreach { 
+        v: Double => config.beta = Some(v) 
+      }
+      opt[Double]('r', "unconstrained") text("percentage of local swaps which should be allowed to be unconstrained") foreach {
+         v: Double => config.constrainedRatio = Some(v) 
+      } 
+      opt[String]('d', "dumpDistances") text("dump spectral distances to this file") foreach {
+        v: String => config.distanceDumpFile = Some(v.trim)
+      }
 
-      opt("u", "g1", "first input graph",
-	{ v: String => config.g1FileName = v.trim})
-      opt("v", "g2", "second input graph",
-	{ v: String => config.g2FileName = v.trim})
-      opt("s", "s1", "first input signature file",
-	{ v: String => config.g1SigFile = v.trim})
-      opt("t", "s2", "second input signature file",
-	{ v: String => config.g2SigFile = v.trim})
-      opt("x", "blast", "Pairwise BLAST Scores",
-	{ v: String => config.blastFile = v.trim})
-      opt("o", "output", "output signature file",
-	{ v: String => config.outputDir = v.trim})
-      opt("c", "config", "configuration file",
-	{ v: String => config.cfgFile = v.trim})
-      help("h", "help", "produce this help message")
+      opt[String]('u', "g1") text("first input graph") foreach { 
+        v: String => config.g1FileName = v.trim
+      }
+      opt[String]('v', "g2") text("second input graph") foreach { 
+        v: String => config.g2FileName = v.trim
+      }
+      opt[String]('s', "s1") text("first input signature file") foreach { 
+        v: String => config.g1SigFile = v.trim
+      }
+      opt[String]('t', "s2") text("second input signature file") foreach { 
+        v: String => config.g2SigFile = v.trim
+      }
+      opt[String]('x', "blast") text("Pairwise BLAST Scores") foreach { 
+        v: String => config.blastFile = v.trim
+      }
+      opt[String]('o', "output") text("output signature file") foreach { 
+        v: String => config.outputDir = v.trim
+      }
+      opt[String]('c', "config") text("configuration file") foreach { 
+        v: String => config.cfgFile = v.trim
+      }
+      help("help") text("produce this help message")
     }
 
     if (parser.parse(args)) {
@@ -416,8 +428,8 @@ object LocalAligner{
 
       
       //scala.concurrent.context.numThreads = config.numActors
-      
-      val cfg = Configuration( Source.fromFile(config.cfgFile) )
+      // Either . . . really?!      
+      val cfg = Configuration( Source.fromFile(config.cfgFile) ).right.get
       val mainCfgOpt = cfg.getSection("main")
       assert( !mainCfgOpt.isEmpty, "Configuration file must contain [main] section" )
       val mainCfg = mainCfgOpt.get

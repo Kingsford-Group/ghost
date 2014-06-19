@@ -39,19 +39,25 @@ object SpectralDecomposition {
 
   def main(args: Array[String]) {
     var config = new Config
-    val parser = new OptionParser("ComputeSubgraphSignatures") {
-      intOpt("p", "numProcessors", "number of actors to use in parallel",
-	   { v: Int => config.numActors = v })
-      opt("i", "input", "input network file",
-	{ v: String => config.infile = v})
-      opt("s", "seqfile", "sequence input file",
-	{ v: String => config.seqfile = v})
-      opt("o", "output", "output signature file",
-	{ v: String => config.outdir = v})
-      intOpt("k", "numHops", "maximum hop neighborhood to consider",
-	     { v: Int => config.numHops = v})
-      booleanOpt("w", "useWeight", "use edge confidence",
-	       { v: Boolean => config.useWeight = v})
+    val parser = new OptionParser[Unit]("ComputeSubgraphSignatures") {
+      opt[Int]('p', "numProcessors") text("number of actors to use in parallel") foreach {
+        v: Int => config.numActors = v 
+      }
+      opt[String]('i', "input") text("input network file") foreach {
+	    v: String => config.infile = v
+      }
+      opt[String]('s', "seqfile") text("sequence input file") foreach { 
+        v: String => config.seqfile = v
+      }
+      opt[String]('o', "output") text("output signature file") foreach {
+	     v: String => config.outdir = v
+      }
+      opt[Int]('k', "numHops") text("maximum hop neighborhood to consider") foreach { 
+        v: Int => config.numHops = v
+      }
+      opt[Boolean]('w', "useWeight") text("use edge confidence") foreach {
+	    v: Boolean => config.useWeight = v
+      }
     }
 
     if (parser.parse(args)) {
