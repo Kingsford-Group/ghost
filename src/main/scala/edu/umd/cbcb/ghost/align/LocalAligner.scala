@@ -53,6 +53,21 @@ object LocalAligner{
   type GraphT = WeightedPseudograph[SimpleVertex, SequenceWeightedEdge]
   type SubgraphT = Subgraph[SimpleVertex, SequenceWeightedEdge, GraphT]
 
+  def setParallelismGlobally(numThreads: Int): Unit = {
+      val parPkgObj = scala.collection.parallel.`package`
+      val defaultTaskSupportField = parPkgObj.getClass.getDeclaredFields.find{
+          _.getName == "defaultTaskSupport"
+      }.get
+
+      defaultTaskSupportField.setAccessible(true)
+      defaultTaskSupportField.set(
+          parPkgObj, 
+          new scala.collection.parallel.ForkJoinTaskSupport(
+              new scala.concurrent.forkjoin.ForkJoinPool(numThreads)
+          ) 
+      )
+  }
+
   /**
    * Configuration Options
    */
@@ -428,6 +443,7 @@ object LocalAligner{
 
       
       //scala.concurrent.context.numThreads = config.numActors
+      setParallelismGlobally(config.numActors)
       // Either . . . really?!      
       val cfg = Configuration( Source.fromFile(config.cfgFile) ).right.get
       val mainCfgOpt = cfg.getSection("main")

@@ -50,6 +50,21 @@ object ComputeSubgraphSignatures {
     var useWeight = false
   }
 
+  def setParallelismGlobally(numThreads: Int): Unit = {
+      val parPkgObj = scala.collection.parallel.`package`
+      val defaultTaskSupportField = parPkgObj.getClass.getDeclaredFields.find{
+          _.getName == "defaultTaskSupport"
+      }.get
+
+      defaultTaskSupportField.setAccessible(true)
+      defaultTaskSupportField.set(
+          parPkgObj, 
+          new scala.collection.parallel.ForkJoinTaskSupport(
+              new scala.concurrent.forkjoin.ForkJoinPool(numThreads)
+          ) 
+      )
+  }
+
   def main(args: Array[String]) {
     var config = new Config
     val parser = new scopt.OptionParser[Unit]("ComputeSubgraphSignatures") {
@@ -118,6 +133,8 @@ object ComputeSubgraphSignatures {
       //.withNewThreadPoolWithLinkedBlockingQueueWithUnboundedCapacity
       //.setCorePoolSize(config.numActors)
       //.build
+
+      setParallelismGlobally(config.numActors)
 
       val extractionActors = ArrayBuffer.empty[ActorRef]
       val system = ActorSystem("SubgraphExtractionActorSystem")
